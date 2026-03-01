@@ -1,0 +1,227 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap');
+
+/* ═══════════════════════════════════════════════
+   CUSTOM CSS VARIABLES
+═══════════════════════════════════════════════ */
+:root {
+  /* Colors */
+  --color-forest:       #1e3d30;
+  --color-forest-dark:  #2a4e40;
+  --color-forest-deep:  #16301f;
+  --color-cream:        #f5f1ea;
+  --color-cream-dark:   #ede8df;
+  --color-mint:         #d6ebe2;
+  --color-mint-light:   #e4f0ea;
+  --color-sand:         #e8c9a0;
+  --color-muted:        #6b7f74;
+  --color-mid:          #3a5448;
+  --color-border:       #ddd8cf;
+  --color-terra:        #8b4a2b;
+  --color-terra-light:  #c47840;
+
+  /* Fonts */
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans:  "DM Sans", sans-serif;
+}
+
+/* ═══════════════════════════════════════════════
+   GLOBAL RESET & BACKGROUND
+═══════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--color-cream);
+  color: var(--color-forest);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Override Vite's default root constraints */
+#root {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a  { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: #1e3d30; }
+::-webkit-scrollbar-thumb { background: #2a4e40; border-radius: 9px; }
+
+/* ═══════════════════════════════════════════════
+   REUSABLE COMPONENT CLASSES
+═══════════════════════════════════════════════ */
+
+/* inner content wrapper */
+.inner {
+  max-width: 1140px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 3rem;
+  padding-right: 3rem;
+  width: 100%;
+}
+
+/* eyebrow label */
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  font-family: var(--font-sans);
+  margin-bottom: 0.875rem;
+  display: block;
+}
+
+.label-light {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: var(--font-sans);
+  margin-bottom: 0.875rem;
+  display: block;
+}
+
+/* pill buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  border-width: 1.5px;
+  border-style: solid;
+}
+
+.btn:hover { 
+  transform: scale(1.02); 
+}
+
+.btn:active { 
+  transform: scale(0.97); 
+}
+
+.btn-forest {
+  background-color: var(--color-forest);
+  color: #fff;
+  border-color: var(--color-forest);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  border-width: 1.5px;
+  border-style: solid;
+}
+
+.btn-forest:hover { 
+  background-color: var(--color-forest-dark); 
+  transform: scale(1.02); 
+}
+
+.btn-sand {
+  background-color: var(--color-sand);
+  color: var(--color-forest);
+  border-color: var(--color-sand);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  border-width: 1.5px;
+  border-style: solid;
+}
+
+.btn-sand:hover { 
+  transform: scale(1.02); 
+}
+
+.btn-white {
+  background-color: #fff;
+  color: var(--color-forest);
+  border-color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  border-width: 1.5px;
+  border-style: solid;
+}
+
+.btn-white:hover { 
+  transform: scale(1.02); 
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-forest);
+  border-color: var(--color-forest);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  border-width: 1.5px;
+  border-style: solid;
+}
+
+.btn-outline:hover { 
+  background-color: var(--color-mint); 
+  transform: scale(1.02); 
+}
