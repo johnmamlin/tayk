@@ -101,6 +101,19 @@ export default function MobileMenu({ open, onClose, navData, location }) {
           >
             {navData.map((item, i) => {
               const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+              const isExactMatch = location.pathname === item.href;
+
+              const handleClick = (e) => {
+                if (isExactMatch) {
+                  e.preventDefault();
+                  window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                  });
+                }
+                onClose();
+              };
+
               return (
                 <motion.div
                   key={item.id}
@@ -115,7 +128,7 @@ export default function MobileMenu({ open, onClose, navData, location }) {
                 >
                   <Link
                     to={item.href}
-                    onClick={onClose}
+                    onClick={handleClick}
                     style={{
                       display: 'flex',
                       alignItems: 'center',

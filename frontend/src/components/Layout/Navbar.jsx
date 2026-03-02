@@ -311,6 +311,18 @@ export default function Navbar() {
 
             {NAV_DATA.map(item => {
               const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+              const isExactMatch = location.pathname === item.href;
+
+              const handleClick = (e) => {
+                if (isExactMatch) {
+                  e.preventDefault();
+                  window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                  });
+                }
+              };
+
               return (
                 <Link
                   key={item.id}
@@ -318,6 +330,7 @@ export default function Navbar() {
                   className="an-link"
                   data-active={isActive}
                   aria-current={isActive ? 'page' : undefined}
+                  onClick={handleClick}
                   style={{
                     padding: '8px 12px', borderRadius: 8,
                     fontSize: 13.5, fontWeight: isActive ? 600 : 500,
