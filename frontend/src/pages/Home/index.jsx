@@ -1,680 +1,630 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, Check, MapPin, Calendar, Users, TrendingUp } from 'lucide-react';
 
-/* ════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    GLOBAL STYLES
-   Exact Parsley Health colour tokens:
-   #1e3d30  dark forest green  → hero, footer, dark sections
-   #f5f1ea  warm cream         → main light sections
-   #d6ebe2  pale mint          → testimonial bg
-   #e8ede8  very pale mint     → light-mint sections
-   warm terracotta gradient    → "need help" CTA band
-════════════════════════════════════════════ */
-const G = () => (
+   Tokens: --G forest | --CR cream | --TC1/2 terracotta
+   Aesthetic: Editorial luxury consultancy · Bento grids
+═══════════════════════════════════════════════════════════ */
+const GlobalStyles = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap');
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    :root{
-      --G:  #1e3d30;
-      --G2: #2a4e40;
-      --CR: #f5f1ea;
-      --CR2:#ede8df;
-      --MT: #d6ebe2;
-      --MT2:#e4f0ea;
-      --TX: #1e3d30;
-      --TM: #3a5448;
-      --TL: #6b7f74;
-      --BD: #ddd8cf;
-      --WH: #ffffff;
-      --TC1:#8b4a2b;
-      --TC2:#c47840;
-    }
-    html{scroll-behavior:smooth;}
-    body{background:var(--CR);color:var(--TX);font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased;font-size:16px;line-height:1.6;}
-    .sr{font-family:'Cormorant Garamond',Georgia,serif;}
-    a{color:inherit;text-decoration:none;}
-    ::-webkit-scrollbar{width:4px;}
-    ::-webkit-scrollbar-track{background:var(--G);}
-    ::-webkit-scrollbar-thumb{background:var(--G2);border-radius:9px;}
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Outfit:wght@300;400;500;600;700&display=swap');
 
-    /* sticky get-care pill */
-    .sc{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:200;
-      background:var(--G);color:#fff;border:none;border-radius:99px;
-      padding:13px 28px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;
-      cursor:pointer;display:inline-flex;align-items:center;gap:8px;
-      box-shadow:0 4px 24px rgba(30,61,48,.4);transition:background .2s,opacity .2s;}
-    .sc:hover{background:var(--G2);}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --G:   #1e3d30;
+      --G2:  #2a4e40;
+      --G3:  #173327;
+      --G4:  #0f2219;
+      --CR:  #f5f1ea;
+      --CR2: #ede8df;
+      --CR3: #e6e0d5;
+      --MT:  #d6ebe2;
+      --MT2: #e4f0ea;
+      --TX:  #1a2e24;
+      --TM:  #3a5448;
+      --TL:  #6b7f74;
+      --BD:  #ddd8cf;
+      --BD2: #e8e3da;
+      --WH:  #ffffff;
+      --TC1: #8b4a2b;
+      --TC2: #c47840;
+      --TC3: #f0d4b8;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--CR); color: var(--TX);
+      font-family: 'Outfit', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    a { color: inherit; text-decoration: none; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--G4); }
+    ::-webkit-scrollbar-thumb { background: var(--G2); border-radius: 99px; }
+
+    .caps {
+      font-family: 'Outfit', sans-serif;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--TL);
+    }
+
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .ticker-track {
+      display: flex; width: max-content;
+      animation: ticker 30s linear infinite;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+
+    .lift {
+      transition: transform .32s cubic-bezier(.2,.8,.2,1), box-shadow .32s cubic-bezier(.2,.8,.2,1);
+    }
+    .lift:hover { transform: translateY(-5px); box-shadow: 0 20px 56px rgba(26,46,36,.12); }
+
+    .lg { position: relative; display: inline-flex; align-items: center; gap: 6px; }
+    .lg::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 1px; background: currentColor;
+      transition: width .3s cubic-bezier(.4,0,.2,1);
+    }
+    .lg:hover::after { width: 100%; }
+
+    .sc {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      z-index: 200; background: var(--G); color: #fff; border: none;
+      border-radius: 99px; padding: 13px 30px;
+      font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600;
+      letter-spacing: .04em; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 8px 32px rgba(30,61,48,.4);
+      transition: background .25s, transform .2s, box-shadow .25s;
+      white-space: nowrap;
+    }
+    .sc:hover {
+      background: var(--G2);
+      transform: translateX(-50%) translateY(-2px);
+      box-shadow: 0 14px 44px rgba(30,61,48,.5);
+    }
+
+    .h-scroll {
+      display: flex; overflow-x: auto; gap: 14px;
+      padding-bottom: 10px; scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .h-scroll::-webkit-scrollbar { display: none; }
+    .h-scroll > * { scroll-snap-align: start; flex-shrink: 0; }
+
+    .focus-row { border-bottom: 1px solid rgba(255,255,255,.08); cursor: pointer; }
+    .focus-detail {
+      max-height: 0; overflow: hidden;
+      transition: max-height .4s cubic-bezier(.4,0,.2,1), opacity .35s;
+      opacity: 0;
+    }
+    .focus-detail.open { max-height: 130px; opacity: 1; }
+
+    .focus-arrow { transition: transform .3s cubic-bezier(.4,0,.2,1); }
+    .focus-row:hover .focus-arrow { transform: translateX(4px); }
+
+    @media (max-width: 768px) {
+      .hide-mobile { display: none !important; }
+      .mobile-full { grid-column: 1 / -1 !important; }
+    }
+    @media (min-width: 769px) {
+      .hide-desktop { display: none !important; }
+    }
+    @media (max-width: 600px) {
+      .trust-row { grid-template-columns: repeat(2,1fr) !important; }
+    }
+    @media (max-width: 900px) {
+      .wwd-cols { grid-template-columns: 1fr !important; }
+      .cs-cols { grid-template-columns: 1fr !important; }
+      .st-cols { grid-template-columns: 1fr !important; }
+      .footer-cols { grid-template-columns: 1fr 1fr !important; }
+      .hero-cols { grid-template-columns: 1fr !important; }
+    }
+    input:focus { outline: none; }
   `}</style>
 );
 
-/* ─── animation helper ─── */
 const EASE = [0.16, 1, 0.3, 1];
-const R = ({ children, d = 0, y = 24, style = {}, className = '' }) => {
+const EASE2 = [0.4, 0, 0.2, 1];
+
+/* Scroll reveal */
+const R = ({ children, d = 0, y = 24, x = 0, style = {}, className = '' }) => {
   const ref = useRef(null);
-  const v = useInView(ref, { once: true, margin: '-48px' });
+  const v = useInView(ref, { once: true, margin: '-60px' });
   return (
     <motion.div ref={ref} style={style} className={className}
-      initial={{ opacity: 0, y }} animate={v ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.65, ease: EASE, delay: d }}>
+      initial={{ opacity: 0, y, x }}
+      animate={v ? { opacity: 1, y: 0, x: 0 } : {}}
+      transition={{ duration: .68, ease: EASE, delay: d }}>
       {children}
     </motion.div>
   );
 };
 
-/* ─── max-width wrapper ─── */
-const W = ({ ch, style = {} }) => (
-  <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 40px', ...style }}>{ch}</div>
+/* Max-width wrapper */
+const W = ({ children, style = {} }) => (
+  <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 clamp(20px,5vw,56px)', ...style }}>
+    {children}
+  </div>
 );
 
-/* ─── pill button ─── */
-const Btn = ({ ch, v = 'green', href = '#', sx = {} }) => {
-  const vs = {
-    green:   { bg: 'var(--G)',   col: '#fff',        br: 'none' },
-    sand:    { bg: '#e8c9a0',    col: 'var(--G)',     br: 'none' },
-    outline: { bg: 'transparent',col: 'var(--G)',     br: '1.5px solid var(--G)' },
-    'ow':    { bg: 'transparent',col: '#fff',         br: '1.5px solid rgba(255,255,255,.45)' },
-    white:   { bg: '#fff',       col: 'var(--G)',     br: 'none' },
-    light:   { bg: 'var(--MT)',  col: 'var(--G)',     br: 'none' },
+/* Pill button */
+const Btn = ({ children, v = 'green', href = '#', style = {} }) => {
+  const map = {
+    green: { bg: 'var(--G)', col: '#fff', br: 'none', sh: '0 4px 20px rgba(30,61,48,.28)' },
+    sand: { bg: '#e8c9a0', col: 'var(--G)', br: 'none', sh: '0 4px 16px rgba(200,170,100,.3)' },
+    outline: { bg: 'transparent', col: 'var(--G)', br: '1.5px solid var(--G)', sh: 'none' },
+    ow: { bg: 'transparent', col: '#fff', br: '1.5px solid rgba(255,255,255,.4)', sh: 'none' },
+    white: { bg: '#fff', col: 'var(--G)', br: 'none', sh: '0 4px 20px rgba(0,0,0,.12)' },
+    ghost: { bg: 'rgba(255,255,255,.1)', col: '#fff', br: '1px solid rgba(255,255,255,.2)', sh: 'none' },
   };
-  const s = vs[v] || vs.green;
+  const s = map[v] || map.green;
   return (
-    <motion.a href={href} whileHover={{ scale: 1.025 }} whileTap={{ scale: .97 }}
-      style={{ display:'inline-flex', alignItems:'center', gap:8, borderRadius:99,
-        padding:'13px 28px', fontSize:15, fontWeight:500,
-        background:s.bg, color:s.col, border:s.br||'none', cursor:'pointer', ...sx }}>
-      {ch}
+    <motion.a href={href} whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: .97 }}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+        borderRadius: 99, padding: '12px 26px',
+        fontSize: 13, fontWeight: 600, letterSpacing: '.04em',
+        fontFamily: "'Outfit', sans-serif",
+        background: s.bg, color: s.col, border: s.br || 'none',
+        boxShadow: s.sh, cursor: 'pointer', transition: 'box-shadow .25s',
+        ...style,
+      }}>
+      {children}
     </motion.a>
   );
 };
 
-/* ═══════════════════════════════════════════
-   §1  HERO  — dark green, left text, right round image
-   (mirrors screenshot 17)
-═══════════════════════════════════════════ */
-const Hero = () => (
-  <section style={{ background:'var(--G)', padding:'120px 0 80px' }}>
-    <W ch={
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:60, alignItems:'center' }}>
+/* ═══════════════════════════════════════════════════════════
+   §1  HERO
+═══════════════════════════════════════════════════════════ */
+const Hero = () => {
+  const badges = ['About Altura', 'Strategic Partnership', '15+ Years', 'Pan-African', 'Evidence-Led'];
+  return (
+    <section style={{ background: 'var(--G)', minHeight: '92vh', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+      {/* Diagonal texture */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: `repeating-linear-gradient(-45deg,transparent,transparent 60px,rgba(255,255,255,.015) 60px,rgba(255,255,255,.015) 61px)` }} />
+      {/* Glow */}
+      <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: 'clamp(280px,45vw,580px)', aspectRatio: '1', borderRadius: '50%', background: 'radial-gradient(circle, rgba(214,235,226,.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-        {/* left */}
-        <div>
-          <motion.h1 className="sr"
-            initial={{ opacity:0, y:36 }} animate={{ opacity:1, y:0 }}
-            transition={{ duration:.9, ease:EASE, delay:.1 }}
-            style={{ fontSize:'clamp(40px,5vw,64px)', fontWeight:400, color:'#fff', lineHeight:1.08, marginBottom:24 }}>
-            Care that helps you feel better and stay well
-          </motion.h1>
+      <W style={{ flex: 1, display: 'flex', alignItems: 'center', padding: 'clamp(100px,12vw,140px) clamp(20px,5vw,56px) 80px' }}>
+        <div className="hero-cols" style={{ display: 'grid', gridTemplateColumns: '1.1fr .9fr', gap: 'clamp(40px,6vw,88px)', alignItems: 'center', width: '100%' }}>
 
-          <motion.p initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }}
-            transition={{ duration:.8, ease:EASE, delay:.26 }}
-            style={{ fontSize:17, fontWeight:300, color:'rgba(255,255,255,.75)', lineHeight:1.7, marginBottom:36, maxWidth:460 }}>
-            Root-cause health consultancy bridging clinical medicine and public health policy
-            to resolve your underlying symptoms and build lasting, systemic health.
-          </motion.p>
+          {/* LEFT */}
+          <div>
+            {/* Badges */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .6, ease: EASE, delay: .06 }}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 36 }}>
+              {badges.map((b, i) => (
+                <motion.span key={b} initial={{ opacity: 0, scale: .9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .1 + i * .07 }}
+                  style={{ padding: '5px 14px', borderRadius: 99, border: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.05)', backdropFilter: 'blur(8px)', fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,.72)', letterSpacing: '.06em' }}>
+                  {b}
+                </motion.span>
+              ))}
+            </motion.div>
 
-          <motion.div initial={{ opacity:0, y:14 }} animate={{ opacity:1, y:0 }}
-            transition={{ duration:.7, ease:EASE, delay:.38 }}
-            style={{ display:'flex', alignItems:'center', gap:20, flexWrap:'wrap', marginBottom:52 }}>
-            <Btn v="sand" href="/contact" ch={<>Get care <ArrowRight size={16}/></>}/>
-            <a href="/services" style={{ color:'rgba(255,255,255,.78)', fontSize:15, textDecoration:'underline', textUnderlineOffset:3 }}>
-              Start with labs
-            </a>
+            {/* Headline */}
+            <motion.h1 className="serif" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: EASE, delay: .16 }}
+              style={{ fontSize: 'clamp(36px,5.5vw,70px)', fontWeight: 400, color: '#fff', lineHeight: 1.04, letterSpacing: '-0.02em', marginBottom: 28 }}>
+              Building Healthier
+              <span style={{ display: 'block', fontStyle: 'italic', color: 'var(--MT)' }}>Communities</span>
+            </motion.h1>
+
+            {/* Subtext */}
+            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .8, ease: EASE, delay: .3 }}
+              style={{ fontSize: 'clamp(15px,1.6vw,17px)', fontWeight: 300, color: 'rgba(255,255,255,.62)', lineHeight: 1.82, marginBottom: 44, maxWidth: 500 }}>
+              Partnering with governments, NGOs, and counties to deliver measurable health system change.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7, ease: EASE, delay: .42 }}
+              style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 56 }}>
+              <Btn v="sand" href="/contact">Partner with us <ArrowRight size={14} strokeWidth={2} /></Btn>
+              <Btn v="ghost" href="/services">Our services</Btn>
+            </motion.div>
+
+            {/* Mini stats */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: .8, delay: .54 }}
+              style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
+              {[['15+', 'Years of expertise'], ['47+', 'Projects delivered'], ['12', 'Countries reached']].map(([v, l]) => (
+                <div key={v}>
+                  <div className="serif" style={{ fontSize: 'clamp(26px,3vw,36px)', fontWeight: 400, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{v}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', fontWeight: 400, marginTop: 5, letterSpacing: '.02em' }}>{l}</div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* RIGHT — editorial image */}
+          <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.1, ease: EASE, delay: .22 }}
+            className="hide-mobile" style={{ position: 'relative' }}>
+            <div style={{ width: '100%', aspectRatio: '4/4.6', borderRadius: 24, overflow: 'hidden', backgroundImage: 'url(/images/background3.jpeg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: 'var(--G2)', boxShadow: '0 32px 80px rgba(0,0,0,.4)' }} />
+            {/* Floating KPI card */}
+            <motion.div initial={{ opacity: 0, y: 20, scale: .9 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .7, ease: EASE, delay: .72 }}
+              style={{ position: 'absolute', bottom: 28, left: -28, background: '#fff', borderRadius: 16, padding: '18px 22px', boxShadow: '0 12px 40px rgba(0,0,0,.15)', minWidth: 180 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--TL)', marginBottom: 8 }}>Impact This Year</p>
+              <div className="serif" style={{ fontSize: 36, fontWeight: 400, color: 'var(--G)', lineHeight: 1 }}>98%</div>
+              <p style={{ fontSize: 12, color: 'var(--TM)', fontWeight: 300, marginTop: 4 }}>Client satisfaction rate</p>
+            </motion.div>
+            {/* Corner ring */}
+            <div style={{ position: 'absolute', top: -16, right: -16, width: 80, height: 80, borderRadius: '50%', border: '1px solid rgba(214,235,226,.18)', pointerEvents: 'none' }} />
           </motion.div>
-
-          <motion.ul initial={{ opacity:0 }} animate={{ opacity:1 }}
-            transition={{ duration:.8, delay:.55 }}
-            style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:14 }}>
-            {[
-              'Board-certified clinicians in functional and conventional medicine',
-              'Advanced lab testing and biomarker interpretation',
-              'Health policy expertise across national, county and NGO levels',
-              '89% of members improve or eliminate symptoms within 1 year',
-            ].map(t => (
-              <li key={t} style={{ display:'flex', alignItems:'flex-start', gap:10,
-                color:'rgba(255,255,255,.7)', fontSize:15 }}>
-                <Check size={15} strokeWidth={2.5} color="#e8c9a0" style={{ marginTop:3, flexShrink:0 }}/>{t}
-              </li>
-            ))}
-          </motion.ul>
         </div>
+      </W>
+    </section>
+  );
+};
 
-        {/* right — rounded blob image */}
-        <motion.div initial={{ opacity:0, scale:.95 }} animate={{ opacity:1, scale:1 }}
-          transition={{ duration:1.1, ease:EASE, delay:.2 }}
-          style={{ display:'flex', justifyContent:'center' }}>
-          <div style={{
-            width:'100%', maxWidth:440, aspectRatio:'1/1',
-            borderRadius:'55% 45% 50% 50% / 55% 50% 50% 45%',
-            overflow:'hidden',
-            backgroundImage:'url(/images/backpage2.jpeg)',
-            backgroundSize:'cover', backgroundPosition:'center',
-            backgroundColor:'var(--G2)',
-          }}/>
-        </motion.div>
-      </div>
-    }/>
-  </section>
-);
-
-/* ═══════════════════════════════════════════
-   §2  THREE WAYS  — cream, 3 outlined cards
-   (mirrors screenshot 16)
-═══════════════════════════════════════════ */
-const ThreeWays = () => {
-  const cards = [
-    { tag:'FOR INDIVIDUAL CARE',   icon:'⚕', title:'Complete Care',
-      desc:'Our most comprehensive care experience designed to resolve your symptoms and transform your health. Partner with a dedicated clinician and care team who treat the root cause and support you for the long-term.',
-      cta:'Get care', sub:'Learn more', href:'/contact' },
-    { tag:'FOR PREVENTIVE CARE',   icon:'⚗', title:'Longevity & Diagnostics',
-      desc:'Annual advanced labs panel with expert clinician interpretation, to better understand your body, intervene early, and maintain your health over time. Best for proactive health or early symptoms.',
-      cta:'Start with labs', sub:'Learn more', href:'/services' },
-    { tag:'FOR ORGANISATIONS',     icon:'⚖', title:'Health Policy Consulting',
-      desc:'Institutional support for health policy formulation, programme development and implementation. We bring clinical and public health expertise to national, county and NGO health strategies.',
-      cta:'Learn more', sub:'Talk to an advisor', href:'/contact' },
+/* ═══════════════════════════════════════════════════════════
+   §2  TRUST BAR
+═══════════════════════════════════════════════════════════ */
+const TrustBar = () => {
+  const stats = [
+    { v: '15+', l: 'Years of Expertise', icon: <TrendingUp size={17} strokeWidth={1.5} /> },
+    { v: '47+', l: 'Projects Delivered', icon: <Check size={17} strokeWidth={1.5} /> },
+    { v: '12', l: 'Countries Reached', icon: <MapPin size={17} strokeWidth={1.5} /> },
+    { v: '98%', l: 'Client Satisfaction Rate', icon: <Users size={17} strokeWidth={1.5} /> },
   ];
   return (
-    <section style={{ background:'var(--CR)', padding:'96px 0' }}>
-      <W ch={<>
-        <R style={{ textAlign:'center', marginBottom:64 }}>
-          <p style={{ fontSize:12, fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--TL)', marginBottom:14 }}>
-            WHERE TO START
-          </p>
-          <h2 className="sr" style={{ fontSize:'clamp(32px,4vw,52px)', fontWeight:400, color:'var(--TX)', lineHeight:1.1 }}>
-            Three ways to start fixing the root cause today
-          </h2>
-        </R>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:24 }}>
-          {cards.map((c,i) => (
-            <R key={c.title} d={i*.1}>
-              <div style={{ border:'1px solid var(--BD)', borderRadius:12, padding:'36px 32px',
-                background:'#fff', display:'flex', flexDirection:'column', height:'100%' }}>
-                <p style={{ fontSize:11, fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--TL)', marginBottom:16 }}>
-                  {c.tag}
-                </p>
-                <h3 className="sr" style={{ fontSize:30, fontWeight:400, color:'var(--TX)', marginBottom:16, lineHeight:1.15 }}>
-                  {c.title}
-                </h3>
-                <p style={{ fontSize:15, color:'var(--TM)', lineHeight:1.72, fontWeight:300, flexGrow:1, marginBottom:32 }}>
-                  {c.desc}
-                </p>
-                <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-                  <Btn v="outline" href={c.href} ch={<>{c.cta} <ArrowRight size={14}/></>}/>
-                  <a href={c.href} style={{ fontSize:14, color:'var(--TX)', textDecoration:'underline', textUnderlineOffset:3, paddingLeft:4 }}>
-                    {c.sub}
-                  </a>
+    <section style={{ background: 'var(--G3)', borderBottom: '1px solid rgba(255,255,255,.06)' }}>
+      <W>
+        <div className="trust-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 0 }}>
+          {stats.map((s, i) => (
+            <R key={s.v} d={i * .07}>
+              <div style={{ padding: 'clamp(22px,4vw,34px) clamp(18px,3vw,28px)', borderRight: i < stats.length - 1 ? '1px solid rgba(255,255,255,.06)' : 'none', display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ color: 'var(--MT)', opacity: .65, flexShrink: 0 }}>{s.icon}</div>
+                <div>
+                  <div className="serif" style={{ fontSize: 'clamp(24px,3vw,36px)', fontWeight: 400, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{s.v}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,.38)', fontWeight: 400, marginTop: 5, letterSpacing: '.02em' }}>{s.l}</div>
                 </div>
               </div>
             </R>
           ))}
         </div>
-        <R d={.3} style={{ textAlign:'center', marginTop:40 }}>
-          <a href="/contact" style={{ fontSize:15, color:'var(--TX)', textDecoration:'underline', textUnderlineOffset:3 }}>
-            Not sure where to start? Talk to an advisor →
-          </a>
-        </R>
-      </>}/>
+      </W>
     </section>
   );
 };
 
-/* ═══════════════════════════════════════════
-   §3  TERRACOTTA NEED-HELP BAND
-   (mirrors screenshot 10)
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   §3  TICKER
+═══════════════════════════════════════════════════════════ */
+const Ticker = () => {
+  const words = ['CLINICAL EXCELLENCE', '·', 'POLICY LEADERSHIP', '·', 'SYSTEMS THINKING', '·', 'COMMUNITY IMPACT', '·', 'EVIDENCE-LED', '·', 'PAN-AFRICAN REACH', '·', 'PUBLIC HEALTH', '·', 'CAPACITY BUILDING', '·'];
+  const all = [...words, ...words];
+  return (
+    <div style={{ background: 'var(--G)', borderTop: '1px solid rgba(255,255,255,.07)', overflow: 'hidden', padding: '17px 0' }}>
+      <div className="ticker-track">
+        {all.map((w, i) => (
+          <span key={i} style={{ whiteSpace: 'nowrap', padding: '0 clamp(12px,2vw,22px)', fontSize: 10, fontWeight: 700, letterSpacing: '.22em', color: w === '·' ? 'var(--MT)' : 'rgba(255,255,255,.35)' }}>{w}</span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════
+   §4  CORE VALUES — Bento grid
+═══════════════════════════════════════════════════════════ */
+const CoreValues = () => {
+  const vals = [
+    { n: '01', title: 'Evidence-Led Practice', body: "Every recommendation is grounded in data, peer-reviewed research, and measurable outcomes. We don't guess — we verify.", bg: 'var(--MT2)', dark: false },
+    { n: '02', title: 'Systems Thinking', body: 'Health challenges are interconnected. We map entire ecosystems — policy, infrastructure, behaviour — before we intervene.', bg: 'var(--CR)', dark: false },
+    { n: '03', title: 'Community Ownership', body: 'Sustainable change only happens when communities lead. We build capacity, transfer knowledge, and create lasting local structures.', bg: 'var(--G)', dark: true },
+    { n: '04', title: 'Radical Accountability', body: 'We set KPIs before we start and report honestly on every project. Our clients see both our wins and our learnings.', bg: 'var(--CR2)', dark: false },
+  ];
+  const spans = [7, 5, 5, 7];
+
+  return (
+    <section style={{ background: 'var(--CR)', padding: 'clamp(72px,10vw,120px) 0' }}>
+      <W>
+        <R>
+          <div style={{ textAlign: 'center', marginBottom: 64 }}>
+            <p className="caps" style={{ marginBottom: 14 }}>What Drives Us</p>
+            <h2 className="serif" style={{ fontSize: 'clamp(28px,4vw,50px)', fontWeight: 400, color: 'var(--TX)', lineHeight: 1.1, letterSpacing: '-0.01em', marginBottom: 18 }}>Four principles behind every engagement</h2>
+            <p style={{ fontSize: 'clamp(14px,1.5vw,16px)', color: 'var(--TL)', fontWeight: 300, lineHeight: 1.75, maxWidth: 560, margin: '0 auto' }}>Our values aren't a wall poster — they're the criteria we use to accept projects, design solutions, and evaluate impact.</p>
+          </div>
+        </R>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12,1fr)', gap: 14 }}>
+          {vals.map((c, i) => (
+            <R key={c.n} d={i * .08} className="mobile-full" style={{ gridColumn: `span ${spans[i]}` }}>
+              <div className="lift" style={{ background: c.bg, borderRadius: 20, padding: 'clamp(28px,4vw,48px)', minHeight: 260, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: c.dark ? 'none' : '1px solid var(--BD2)', height: '100%' }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: c.dark ? 'rgba(214,235,226,.45)' : 'var(--TL)', letterSpacing: '.16em' }}>{c.n}</span>
+                <div>
+                  <h3 className="serif" style={{ fontSize: 'clamp(20px,2.2vw,30px)', fontWeight: 400, color: c.dark ? '#fff' : 'var(--TX)', marginBottom: 14, lineHeight: 1.2 }}>{c.title}</h3>
+                  <p style={{ fontSize: 14.5, color: c.dark ? 'rgba(255,255,255,.58)' : 'var(--TM)', fontWeight: 300, lineHeight: 1.78 }}>{c.body}</p>
+                </div>
+              </div>
+            </R>
+          ))}
+        </div>
+      </W>
+    </section>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════
+   §5  WHAT WE DO — Numbered hover-reveal list
+═══════════════════════════════════════════════════════════ */
+const WhatWeDo = () => {
+  const [open, setOpen] = useState(null);
+  const areas = [
+    { n: '01', title: 'Health Systems Strengthening', detail: 'Designing scalable frameworks for national and county health systems — from governance structures to service delivery models that endure beyond any single project.' },
+    { n: '02', title: 'Policy Formulation & Implementation', detail: 'End-to-end policy support: drafting, stakeholder alignment, legislative navigation, implementation planning, and monitoring frameworks for governments at every level.' },
+    { n: '03', title: 'Primary Health Care & Family Medicine', detail: 'Embedding PHC principles into county strategies, building family medicine capacity, and reforming community health infrastructure for last-mile delivery.' },
+    { n: '04', title: 'Public Health Training & Capacity Building', detail: 'Bespoke training programmes for health workers, county officials, and NGO teams — from clinical skills to leadership, data literacy, and systems thinking.' },
+    { n: '05', title: 'Medical Products & Health Technologies', detail: 'Strategic guidance on procurement, supply chain resilience, HTA processes, and the integration of digital health tools into existing care pathways.' },
+    { n: '06', title: 'Disease Prevention & Health Promotion', detail: "Community-rooted prevention campaigns, behaviour change communication, and intersectoral coordination for non-communicable and infectious disease control." },
+  ];
+
+  return (
+    <section style={{ background: 'var(--G4)', padding: 'clamp(72px,10vw,120px) 0' }}>
+      <W>
+        <div className="wwd-cols" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(40px,8vw,100px)', alignItems: 'start' }}>
+
+          {/* Left */}
+          <R style={{ position: 'sticky', top: 120 }}>
+            <p className="caps" style={{ color: 'rgba(214,235,226,.4)', marginBottom: 16 }}>What We Do</p>
+            <h2 className="serif" style={{ fontSize: 'clamp(28px,4vw,52px)', fontWeight: 400, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.01em', marginBottom: 24 }}>
+              Strategic focus
+              <span style={{ display: 'block', fontStyle: 'italic', color: 'var(--MT)' }}>areas</span>
+            </h2>
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,.45)', fontWeight: 300, lineHeight: 1.8, marginBottom: 36 }}>
+              From clinical practice to national policy — we work at every level of the health system to create durable change.
+            </p>
+            <Btn v="ow" href="/services">All services <ArrowRight size={13} strokeWidth={2} /></Btn>
+          </R>
+
+          {/* Right: numbered list */}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {areas.map((a, i) => (
+              <R key={a.n} d={i * .05}>
+                <div className="focus-row" onClick={() => setOpen(open === i ? null : i)} style={{ padding: 'clamp(18px,2.5vw,26px) 0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(214,235,226,.28)', letterSpacing: '.1em', minWidth: 26 }}>{a.n}</span>
+                    <span style={{ fontSize: 'clamp(15px,1.7vw,18px)', fontWeight: 500, color: '#fff', flex: 1, letterSpacing: '-.01em' }}>{a.title}</span>
+                    <ArrowUpRight size={15} strokeWidth={1.5} className="focus-arrow" style={{ color: 'rgba(255,255,255,.3)', flexShrink: 0 }} />
+                  </div>
+                  <div className={`focus-detail ${open === i ? 'open' : ''}`} style={{ paddingLeft: 44 }}>
+                    <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,.48)', fontWeight: 300, lineHeight: 1.78, paddingTop: 14 }}>{a.detail}</p>
+                  </div>
+                </div>
+              </R>
+            ))}
+          </div>
+        </div>
+      </W>
+    </section>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════
+   §6  NEED HELP — terracotta band
+═══════════════════════════════════════════════════════════ */
 const NeedHelp = () => (
-  <section style={{ background:'linear-gradient(135deg,var(--TC1) 0%,var(--TC2) 100%)', padding:'72px 40px' }}>
-    <div style={{ maxWidth:1100, margin:'0 auto', display:'grid', gridTemplateColumns:'1fr 1fr', gap:60, alignItems:'center' }}>
-      <R>
-        <h2 className="sr" style={{ fontSize:'clamp(28px,3.5vw,46px)', fontWeight:400, color:'#fff', lineHeight:1.15 }}>
-          Need help deciding where to start?
-        </h2>
-      </R>
-      <R d={.12}>
-        <p style={{ fontSize:16, color:'rgba(255,255,255,.82)', marginBottom:28, fontWeight:300 }}>
-          Schedule a free 15-minute consultation with an Altura advisor.
-        </p>
-        <Btn v="white" href="/contact" ch={<>Talk to an advisor <ArrowRight size={15}/></>}/>
-      </R>
+  <section style={{ background: 'linear-gradient(135deg,var(--TC1) 0%,var(--TC2) 100%)', padding: 'clamp(64px,8vw,88px) clamp(20px,5vw,56px)', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 25% 50%,rgba(255,255,255,.07) 0%,transparent 60%)', pointerEvents: 'none' }} />
+    <div style={{ maxWidth: 1120, margin: '0 auto', position: 'relative' }}>
+      <div className="wwd-cols" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(32px,6vw,80px)', alignItems: 'center' }}>
+        <R><h2 className="serif" style={{ fontSize: 'clamp(26px,3.5vw,46px)', fontWeight: 400, color: '#fff', lineHeight: 1.15 }}>Not sure where Altura can help?</h2></R>
+        <R d={.1}>
+          <p style={{ fontSize: 15.5, color: 'rgba(255,255,255,.78)', marginBottom: 28, fontWeight: 300, lineHeight: 1.75 }}>Schedule a free 20-minute strategy call with our advisory team to discuss your health system challenge.</p>
+          <Btn v="white" href="/contact">Book a strategy call <ArrowRight size={14} strokeWidth={2} /></Btn>
+        </R>
+      </div>
     </div>
   </section>
 );
 
-/* ═══════════════════════════════════════════
-   §4  A MORE COMPLETE UNDERSTANDING
-   3-column symptom cards on cream
-   (mirrors screenshot 9)
-═══════════════════════════════════════════ */
-const Understanding = () => {
-  const cols = [
-    { icon:'◉', head:'Low energy, weight gain, brain fog',
-      bold:'Often linked to thyroid, metabolic, or hormonal imbalances that routine labs miss',
-      body:'We run deeper testing and connect patterns across your whole system to treat the root cause' },
-    { icon:'◈', head:'Bloating, skin flares, digestive issues',
-      bold:'Frequently driven by gut inflammation, food sensitivities, or microbiome imbalance',
-      body:'We identify triggers and heal the gut to relieve and eliminate symptoms' },
-    { icon:'◇', head:'Hormone issues, poor sleep, chronic stress',
-      bold:'Often dismissed or treated in isolation instead of as part of a connected system',
-      body:'We assess hormones, stress, and lifestyle together to restore balance over time' },
+/* ═══════════════════════════════════════════════════════════
+   §7  SUCCESS STORIES — KPI case study cards
+═══════════════════════════════════════════════════════════ */
+const SuccessStories = () => {
+  const cases = [
+    { tag: 'County Government · Nairobi', title: 'Reforming Primary Health Care Delivery', kpis: [['50K+', 'Beneficiaries'], ['18 mo.', 'Timeline'], ['34%', 'Fewer referrals']], body: 'Led the design and rollout of a PHC reform framework for three sub-counties, restructuring community health units and retraining frontline workers.', img: '/images/backpage3.jpeg' },
+    { tag: 'NGO Partnership · UNFPA', title: 'Maternal Health System Strengthening', kpis: [['12', 'Counties'], ['2,400+', 'Workers trained'], ['61%', 'Skilled births ↑']], body: 'Partnered with UNFPA to develop and implement a national maternal health capacity-building curriculum, embedding quality improvement at county level.', img: '/images/backpage2.jpeg' },
+    { tag: 'National Ministry · Kenya MOH', title: 'NCD Policy Formulation & Rollout', kpis: [['1 Policy', 'Passed'], ['8 Agencies', 'Coordinated'], ['3 Years', 'Sustained']], body: "Co-authored Kenya's non-communicable disease prevention policy, coordinating across eight government agencies and translating it into county guides.", img: '/images/oda1.jpeg' },
   ];
+
   return (
-    <section style={{ background:'var(--CR)', padding:'96px 0' }}>
-      <W ch={<>
-        <R style={{ textAlign:'center', marginBottom:56 }}>
-          <h2 className="sr" style={{ fontSize:'clamp(28px,4vw,50px)', fontWeight:400, color:'var(--TX)', marginBottom:20, lineHeight:1.12 }}>
-            A more complete understanding of your health
-          </h2>
-          <p style={{ fontSize:16, color:'var(--TL)', maxWidth:600, margin:'0 auto', fontWeight:300 }}>
-            Our connected, root-cause approach looks at how your body's systems work together to support lasting health.
-          </p>
+    <section style={{ background: 'var(--CR)', padding: 'clamp(72px,10vw,120px) 0' }}>
+      <W>
+        <R>
+          <div style={{ textAlign: 'center', marginBottom: 64 }}>
+            <p className="caps" style={{ marginBottom: 14 }}>Success Stories</p>
+            <h2 className="serif" style={{ fontSize: 'clamp(28px,4vw,50px)', fontWeight: 400, color: 'var(--TX)', lineHeight: 1.1, marginBottom: 18 }}>Impact you can measure</h2>
+            <p style={{ fontSize: 'clamp(14px,1.5vw,16px)', color: 'var(--TL)', fontWeight: 300, lineHeight: 1.75, maxWidth: 520, margin: '0 auto' }}>Every engagement ends with a scorecard. Here is what that looks like in practice.</p>
+          </div>
         </R>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:0, borderLeft:'1px solid var(--BD)' }}>
-          {cols.map((c,i) => (
-            <R key={c.head} d={i*.1}>
-              <div style={{ padding:'40px 36px', borderRight:'1px solid var(--BD)' }}>
-                <div style={{ fontSize:28, color:'var(--TL)', marginBottom:20 }}>{c.icon}</div>
-                <h3 className="sr" style={{ fontSize:28, fontWeight:400, color:'var(--TX)', marginBottom:16, lineHeight:1.15 }}>
-                  {c.head}
-                </h3>
-                <p style={{ fontSize:14, color:'var(--TX)', fontWeight:500, marginBottom:12, lineHeight:1.6 }}>{c.bold}</p>
-                <p style={{ fontSize:14, color:'var(--TL)', fontWeight:300, lineHeight:1.7 }}>{c.body}</p>
+
+        <div className="cs-cols" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
+          {cases.map((c, i) => (
+            <R key={c.title} d={i * .09}>
+              <div className="lift" style={{ border: '1px solid var(--BD2)', borderRadius: 20, overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column', boxShadow: '0 2px 12px rgba(26,46,36,.04)', height: '100%' }}>
+                <div style={{ height: 178, backgroundImage: `url(${c.img})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: 'var(--MT)', position: 'relative' }}>
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg,rgba(26,46,36,.5) 0%,transparent 60%)' }} />
+                  <span style={{ position: 'absolute', bottom: 14, left: 16, fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.85)', letterSpacing: '.12em', textTransform: 'uppercase', background: 'rgba(0,0,0,.3)', padding: '4px 10px', borderRadius: 99, backdropFilter: 'blur(4px)' }}>{c.tag}</span>
+                </div>
+                <div style={{ padding: '22px 22px 26px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  <h3 className="serif" style={{ fontSize: 21, fontWeight: 500, color: 'var(--TX)', marginBottom: 18, lineHeight: 1.2 }}>{c.title}</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 18 }}>
+                    {c.kpis.map(([v, l]) => (
+                      <div key={v} style={{ background: 'var(--MT2)', borderRadius: 10, padding: '10px 10px' }}>
+                        <div className="serif" style={{ fontSize: 17, fontWeight: 500, color: 'var(--G)', lineHeight: 1 }}>{v}</div>
+                        <div style={{ fontSize: 10, color: 'var(--TL)', fontWeight: 400, marginTop: 5, lineHeight: 1.4 }}>{l}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: 13.5, color: 'var(--TM)', fontWeight: 300, lineHeight: 1.78, flex: 1 }}>{c.body}</p>
+                  <a href="/contact" className="lg" style={{ fontSize: 13, fontWeight: 600, color: 'var(--G)', marginTop: 18 }}>Read full story <ArrowRight size={12} strokeWidth={2.2} /></a>
+                </div>
               </div>
             </R>
           ))}
         </div>
-        <R d={.3} style={{ textAlign:'center', marginTop:48 }}>
-          <Btn v="green" href="/services" ch={<>Get started <ArrowRight size={15}/></>}/>
-        </R>
-      </>}/>
+      </W>
     </section>
   );
 };
 
-/* ═══════════════════════════════════════════
-   §5  BIG QUOTE — mint gradient background
-   (mirrors screenshot 7 / 15)
-═══════════════════════════════════════════ */
-const BigQuote = ({ quote, name, role }) => (
-  <section style={{ background:'linear-gradient(180deg,var(--MT2) 0%,var(--MT) 100%)', padding:'112px 40px', textAlign:'center' }}>
-    <R>
-      <div style={{ fontSize:20, letterSpacing:'.28em', color:'var(--G)', marginBottom:36 }}>★★★★★</div>
-      <blockquote className="sr" style={{
-        fontSize:'clamp(22px,3.2vw,40px)', fontWeight:400, fontStyle:'italic',
-        color:'var(--TX)', lineHeight:1.45, maxWidth:860, margin:'0 auto 36px' }}>
-        "{quote}"
-      </blockquote>
-      <p style={{ fontSize:15, fontStyle:'italic', color:'var(--TM)', marginBottom:6 }}>{name}</p>
-      <p style={{ fontSize:11, fontWeight:600, letterSpacing:'.12em', textTransform:'uppercase', color:'var(--TL)' }}>{role}</p>
-      <div style={{ marginTop:44 }}>
-        <Btn v="green" href="/contact" ch={<>Get Care <ArrowRight size={15}/></>}/>
+/* ═══════════════════════════════════════════════════════════
+   §8  ON THE GROUND — Desktop grid / Mobile swipe carousel
+═══════════════════════════════════════════════════════════ */
+const EventCard = ({ e }) => (
+  <div className="lift" style={{ border: '1px solid var(--BD2)', borderRadius: 16, overflow: 'hidden', background: '#fff', boxShadow: '0 2px 10px rgba(26,46,36,.05)' }}>
+    <div style={{ height: 158, backgroundImage: `url(${e.img})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: 'var(--MT)', position: 'relative' }}>
+      <span style={{ position: 'absolute', top: 12, left: 12, background: 'var(--G)', color: '#fff', fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', padding: '4px 12px', borderRadius: 99 }}>{e.tag}</span>
+    </div>
+    <div style={{ padding: '16px 18px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+        <Calendar size={11} color="var(--TL)" strokeWidth={1.8} />
+        <span style={{ fontSize: 11, color: 'var(--TL)', fontWeight: 500, letterSpacing: '.04em' }}>{e.date}</span>
       </div>
-    </R>
-  </section>
+      <h4 className="serif" style={{ fontSize: 19, fontWeight: 500, color: 'var(--TX)', marginBottom: 7, lineHeight: 1.25 }}>{e.title}</h4>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+        <MapPin size={10} color="var(--TL)" strokeWidth={1.8} />
+        <span style={{ fontSize: 11.5, color: 'var(--TL)', fontWeight: 400 }}>{e.loc}</span>
+      </div>
+    </div>
+  </div>
 );
 
-/* ═══════════════════════════════════════════
-   §6  WHY ROOT-CAUSE STATS
-   (mirrors screenshot 13)
-═══════════════════════════════════════════ */
-const WhyStats = () => {
-  const stats = [
-    { v:'70%',  l:'of Kenyans lack access to quality primary health care' },
-    { v:'4–7',  l:'years to get a correct diagnosis for many chronic conditions' },
-    { v:'89%',  l:'of Altura members improve or eliminate symptoms within 1 year' },
+const OnTheGround = () => {
+  const events = [
+    { date: 'Feb 2026', tag: 'Conference', title: 'East Africa Health Systems Forum', loc: 'Nairobi, Kenya', img: '/images/event1.jpeg' },
+    { date: 'Jan 2026', tag: 'Training', title: 'PHC Capacity Building — Kisumu County', loc: 'Kisumu, Kenya', img: '/images/event2.jpeg' },
+    { date: 'Dec 2025', tag: 'Policy Workshop', title: 'NCD Prevention Policy Review', loc: 'Virtual / Nairobi', img: '/images/event3.jpeg' },
+    { date: 'Nov 2025', tag: 'Partnership', title: 'UNFPA Maternal Health Programme Launch', loc: 'Mombasa, Kenya', img: '/images/backpage2.jpeg' },
+    { date: 'Oct 2025', tag: 'Research', title: 'Community Health Survey — 5 Counties', loc: 'Various Counties', img: '/images/backpage3.jpeg' },
   ];
+
   return (
-    <section style={{ background:'var(--CR)', padding:'96px 0' }}>
-      <W ch={
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:80, alignItems:'start' }}>
-          <R>
-            <p style={{ fontSize:12, fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--TL)', marginBottom:16 }}>
-              WHY ROOT-CAUSE HEALTHCARE MATTERS
-            </p>
-            <h2 className="sr" style={{ fontSize:'clamp(28px,3.5vw,44px)', fontWeight:400, color:'var(--TX)', lineHeight:1.2 }}>
-              Why root-cause healthcare matters
-            </h2>
-          </R>
-          <div>
-            {stats.map((s,i) => (
-              <R key={s.v} d={i*.09}>
-                <div style={{ display:'flex', alignItems:'baseline', gap:24,
-                  padding:'24px 0', borderBottom: i < stats.length-1 ? '1px solid var(--BD)' : 'none' }}>
-                  <span className="sr" style={{ fontSize:'clamp(48px,5vw,72px)', fontWeight:400, color:'var(--TX)', minWidth:130, lineHeight:1 }}>
-                    {s.v}
-                  </span>
-                  <span style={{ fontSize:15, color:'var(--TL)', lineHeight:1.55, fontWeight:300 }}>{s.l}</span>
-                </div>
-              </R>
-            ))}
+    <section style={{ background: 'var(--CR2)', padding: 'clamp(72px,10vw,120px) 0' }}>
+      <W>
+        <R>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48, flexWrap: 'wrap', gap: 20 }}>
+            <div>
+              <p className="caps" style={{ marginBottom: 14 }}>On The Ground</p>
+              <h2 className="serif" style={{ fontSize: 'clamp(28px,4vw,48px)', fontWeight: 400, color: 'var(--TX)', lineHeight: 1.1 }}>Recent activity</h2>
+            </div>
+            <a href="/news" className="lg" style={{ fontSize: 13, fontWeight: 600, color: 'var(--G)' }}>View all events <ArrowRight size={13} strokeWidth={2} /></a>
           </div>
-        </div>
-      }/>
-    </section>
-  );
-};
-
-/* ═══════════════════════════════════════════
-   §7  HOW ALTURA DELIVERS DEEPER CARE
-   circular images, 3-col
-   (mirrors screenshot 12)
-═══════════════════════════════════════════ */
-const HowWeDeliver = () => {
-  const cols = [
-    { img:'/images/backpage3.jpeg', title:'Whole-body approach',
-      desc:'Your clinician takes time to understand your symptoms, health history, lifestyle, and goals, so care is grounded in the full context of your health.' },
-    { img:'/images/backpage2.jpeg', title:'Clarity from your labs',
-      desc:'Advanced lab testing helps identify patterns, imbalances, and drivers of symptoms that standard care often misses.' },
-    { img:'/images/oda1.jpeg',      title:'Policy-informed guidance',
-      desc:'You receive expert, personalised guidance shaped by both clinical practice and evidence-based public health policy across national and county levels.' },
-  ];
-  return (
-    <section style={{ background:'var(--CR)', padding:'96px 0' }}>
-      <W ch={<>
-        <R style={{ textAlign:'center', marginBottom:64 }}>
-          <h2 className="sr" style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:400, color:'var(--TX)', marginBottom:20 }}>
-            How Altura delivers deeper care
-          </h2>
-          <p style={{ fontSize:16, color:'var(--TL)', maxWidth:640, margin:'0 auto', fontWeight:300 }}>
-            A connected, root-cause approach that looks at the full picture, not isolated symptoms.
-            Available in-person in Nairobi and via telehealth nationwide.
-          </p>
         </R>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:48 }}>
-          {cols.map((c,i) => (
-            <R key={c.title} d={i*.1} style={{ textAlign:'center' }}>
-              <div style={{ width:200, height:200, borderRadius:'50%', margin:'0 auto 28px',
-                backgroundImage:`url(${c.img})`, backgroundSize:'cover', backgroundPosition:'center',
-                backgroundColor:'var(--MT)' }}/>
-              <h3 className="sr" style={{ fontSize:28, fontWeight:400, color:'var(--TX)', marginBottom:14, lineHeight:1.2 }}>
-                {c.title}
-              </h3>
-              <p style={{ fontSize:15, color:'var(--TM)', lineHeight:1.72, fontWeight:300 }}>{c.desc}</p>
-            </R>
-          ))}
+        {/* Desktop */}
+        <div className="hide-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
+          {events.slice(0, 3).map((e, i) => <R key={e.title} d={i * .08}><EventCard e={e} /></R>)}
         </div>
-        <R d={.3} style={{ textAlign:'center', marginTop:56 }}>
-          <Btn v="green" href="/contact" ch={<>Get care <ArrowRight size={15}/></>}/>
-        </R>
-      </>}/>
+        {/* Mobile swipe */}
+        <div className="hide-desktop h-scroll">
+          {events.map(e => <div key={e.title} style={{ width: '78vw', maxWidth: 290 }}><EventCard e={e} /></div>)}
+        </div>
+      </W>
     </section>
   );
 };
 
-/* ═══════════════════════════════════════════
-   §8  MEMBER OUTCOMES STATS
-   (mirrors screenshot 4)
-═══════════════════════════════════════════ */
-const MemberOutcomes = () => {
-  const stats = [
-    { v:'89%',  l:'improved or eliminated symptoms in the first year' },
-    { v:'71%',  l:'improved mental wellbeing and quality of life' },
-    { v:'15+',  l:'countries of health service delivery experience' },
-  ];
-  return (
-    <section style={{ background:'var(--CR2)', padding:'96px 0' }}>
-      <W ch={
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:80, alignItems:'start' }}>
-          <R>
-            <p style={{ fontSize:12, fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--TL)', marginBottom:16 }}>
-              MEMBER OUTCOMES
-            </p>
-            <h2 className="sr" style={{ fontSize:'clamp(28px,3.5vw,44px)', fontWeight:400, color:'var(--TX)', lineHeight:1.2 }}>
-              Get more out of medicine than you ever thought possible
-            </h2>
-          </R>
-          <div>
-            {stats.map((s,i) => (
-              <R key={s.v} d={i*.09}>
-                <div style={{ display:'flex', alignItems:'baseline', gap:24,
-                  padding:'24px 0', borderBottom: i < stats.length-1 ? '1px solid var(--BD)' : 'none' }}>
-                  <span className="sr" style={{ fontSize:'clamp(48px,5vw,72px)', fontWeight:400, color:'var(--TX)', minWidth:120, lineHeight:1 }}>
-                    {s.v}
-                  </span>
-                  <span style={{ fontSize:15, color:'var(--TL)', lineHeight:1.55, fontWeight:300 }}>{s.l}</span>
-                </div>
-              </R>
-            ))}
-          </div>
-        </div>
-      }/>
-    </section>
-  );
-};
-
-/* ═══════════════════════════════════════════
-   §9  WHY CHOOSE ALTURA — comparison table
-   (mirrors screenshot 6)
-═══════════════════════════════════════════ */
-const CompareTable = () => {
-  const rows = [
-    'Board-certified physicians trained in functional and conventional medicine',
-    'Whole-body assessment and advanced lab interpretation',
-    'Standardised clinical protocol',
-    'Longer visits — initial consultations are 60 minutes',
-    'Root-cause approach across metabolic, hormonal, gut, immune and mental health',
-    'Clinically-guided supplement and lifestyle recommendations',
-    'Care team support between visits for questions and medical record management',
-  ];
-  return (
-    <section style={{ background:'var(--CR)', padding:'96px 0' }}>
-      <W ch={<>
-        <R style={{ textAlign:'center', marginBottom:56 }}>
-          <p style={{ fontSize:12, fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--TL)', marginBottom:14 }}>
-            WHY CHOOSE ALTURA?
-          </p>
-          <h2 className="sr" style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:400, color:'var(--TX)', marginBottom:16 }}>
-            A different model of care
-          </h2>
-          <p style={{ fontSize:16, color:'var(--TL)', maxWidth:600, margin:'0 auto', fontWeight:300 }}>
-            See how Altura compares to traditional healthcare across training, structure, and support.
-          </p>
-        </R>
-
-        {/* table */}
-        <div style={{ border:'1px solid var(--BD)', borderRadius:12, overflow:'hidden' }}>
-          {/* header row */}
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 220px 220px',
-            background:'#fff', borderBottom:'1px solid var(--BD)' }}>
-            <div style={{ padding:'20px 24px' }}/>
-            <div style={{ padding:'20px 24px', background:'var(--MT)', textAlign:'center',
-              fontSize:14, fontWeight:600, color:'var(--G)' }}>Altura Health</div>
-            <div style={{ padding:'20px 24px', textAlign:'center',
-              fontSize:14, fontWeight:500, color:'var(--TL)' }}>Traditional Care</div>
-          </div>
-          {rows.map((r,i) => (
-            <R key={r} d={i*.05}>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 220px 220px',
-                borderBottom: i < rows.length-1 ? '1px solid var(--BD)' : 'none',
-                background: i%2===0 ? '#fff' : 'var(--CR)' }}>
-                <div style={{ padding:'22px 24px', fontSize:15, color:'var(--TX)', fontWeight:300, lineHeight:1.6 }}>{r}</div>
-                <div style={{ padding:'22px 24px', background:'rgba(214,235,226,.35)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <Check size={18} strokeWidth={2.5} color="var(--G)"/>
-                </div>
-                <div style={{ padding:'22px 24px', display:'flex', alignItems:'center', justifyContent:'center',
-                  fontSize:14, color:'var(--TL)', fontWeight:300 }}>
-                  {i < 2 ? '' : i < 4 ? 'Sometimes' : 'Rarely'}
-                </div>
-              </div>
-            </R>
-          ))}
-        </div>
-      </>}/>
-    </section>
-  );
-};
-
-/* ═══════════════════════════════════════════
-   §10  DARK GREEN STATEMENT
-   (mirrors screenshot 5)
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   §9  DARK STATEMENT
+═══════════════════════════════════════════════════════════ */
 const Statement = () => (
-  <section style={{ background:'var(--G)', padding:'96px 40px', textAlign:'center' }}>
+  <section style={{ background: 'var(--G)', padding: 'clamp(80px,12vw,128px) clamp(20px,5vw,56px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(-45deg,transparent,transparent 60px,rgba(255,255,255,.012) 60px,rgba(255,255,255,.012) 61px)`, pointerEvents: 'none' }} />
     <R>
-      <h2 className="sr" style={{ fontSize:'clamp(28px,4vw,52px)', fontWeight:400, color:'#fff', lineHeight:1.35, maxWidth:820, margin:'0 auto' }}>
-        Your health is complex, and your symptoms are only part of the story.
-        We listen, uncover the why, and treat the root cause.
-      </h2>
+      <div style={{ width: 1, height: 56, background: 'rgba(214,235,226,.18)', margin: '0 auto 48px' }} />
+      <blockquote className="serif" style={{ fontSize: 'clamp(22px,4vw,52px)', fontWeight: 400, color: '#fff', lineHeight: 1.32, maxWidth: 820, margin: '0 auto 48px', letterSpacing: '-0.015em' }}>
+        "Your health is complex, and your symptoms are only part of the story. We listen, uncover the why, and treat the root cause."
+      </blockquote>
+      <div style={{ width: 1, height: 56, background: 'rgba(214,235,226,.18)', margin: '0 auto 40px' }} />
+      <Btn v="sand" href="/contact">Start a conversation <ArrowRight size={14} strokeWidth={2} /></Btn>
     </R>
   </section>
 );
 
-/* ═══════════════════════════════════════════
-   §11  SCHEDULE A CALL / PARTNERS LOGOS
-   (mirrors screenshot 3)
-═══════════════════════════════════════════ */
-const ScheduleAndLogos = () => (
-  <>
-    <section style={{ background:'linear-gradient(180deg,#e8f0ec 0%,var(--CR) 100%)', padding:'72px 40px', textAlign:'center' }}>
-      <R>
-        <p style={{ fontSize:17, color:'var(--TX)', marginBottom:32, fontWeight:300 }}>
-          Schedule a call with an advisor now, or call/text us at{' '}
-          <strong style={{ fontWeight:500 }}>+254 (0) 713 123 090</strong>.
-        </p>
-        <div style={{ display:'flex', gap:16, justifyContent:'center', flexWrap:'wrap' }}>
-          <Btn v="green" href="/contact" ch={<>Schedule a call <ArrowRight size={15}/></>}/>
-          <Btn v="outline" href="tel:+254713123090" ch="Call / Text us"/>
-        </div>
+/* ═══════════════════════════════════════════════════════════
+   §10  PARTNERS
+═══════════════════════════════════════════════════════════ */
+const Partners = () => (
+  <section style={{ background: 'var(--CR)', padding: 'clamp(56px,8vw,88px) 0', borderTop: '1px solid var(--BD2)' }}>
+    <W>
+      <R style={{ textAlign: 'center', marginBottom: 44 }}>
+        <p className="caps">Trusted by leading organisations</p>
       </R>
-    </section>
-
-    <section style={{ background:'var(--CR)', padding:'72px 0', borderTop:'1px solid var(--BD)' }}>
-      <W ch={<>
-        <R style={{ textAlign:'center', marginBottom:48 }}>
-          <h2 className="sr" style={{ fontSize:'clamp(24px,3vw,38px)', fontWeight:400, color:'var(--TX)' }}>
-            Partnered with
-          </h2>
-        </R>
-        <div style={{ display:'flex', gap:48, justifyContent:'center', alignItems:'center', flexWrap:'wrap' }}>
-          {['UNICEF','WHO','UNFPA','USAID','Kenya MOH','Kenya Red Cross'].map(p => (
-            <R key={p} d={.05}>
-              <div style={{ fontSize:15, fontWeight:600, color:'var(--TL)', letterSpacing:'.04em',
-                padding:'10px 20px', border:'1px solid var(--BD)', borderRadius:6 }}>
-                {p}
-              </div>
-            </R>
-          ))}
-        </div>
-      </>}/>
-    </section>
-  </>
-);
-
-/* ═══════════════════════════════════════════
-   §12  CONDITIONS CAROUSEL
-   (mirrors screenshot 14)
-═══════════════════════════════════════════ */
-const Conditions = () => {
-  const [idx, setIdx] = useState(0);
-  const cards = [
-    { title:'Gut & Digestive Health',    desc:'Root-cause care for persistent digestive symptoms that affect daily life.',
-      syms:'IBS, IBD, acid reflux, SIBO, leaky gut, constipation, bloating, food intolerances', href:'/services' },
-    { title:'Hormone Health',            desc:'Support hormone health by understanding patterns across the whole body.',
-      syms:'Fatigue, weight changes, PMS, acne, irregular cycles, hair loss, PCOS', href:'/services' },
-    { title:'Autoimmune & Inflammation', desc:'Care that looks deeper when immune or inflammatory symptoms persist.',
-      syms:"Hashimoto's, lupus, psoriasis, rheumatoid arthritis, joint pain, chronic fatigue", href:'/services' },
-    { title:'Mental & Emotional Health', desc:'An integrative approach to mental wellbeing that considers biology and lifestyle.',
-      syms:'Anxiety, brain fog, low mood, insomnia, fatigue, difficulty concentrating', href:'/services' },
-    { title:'Metabolic Health',          desc:'Root-cause care for blood sugar, weight, and metabolic function.',
-      syms:'Weight gain, insulin resistance, prediabetes, type 2 diabetes, unexplained fatigue', href:'/services' },
-    { title:'Maternal & Reproductive Health', desc:'Whole-body care supporting reproductive health at every stage.',
-      syms:'Antenatal care, postnatal recovery, family planning, PCOS, fertility, gestational diabetes', href:'/services' },
-  ];
-  const vis = [0,1,2].map(o => (idx+o) % cards.length);
-
-  return (
-    <section style={{ background:'var(--CR)', padding:'96px 0', overflow:'hidden' }}>
-      <W ch={<>
-        <div style={{ display:'grid', gridTemplateColumns:'300px 1fr', gap:64, alignItems:'start' }}>
-          <R>
-            <h2 className="sr" style={{ fontSize:'clamp(28px,3.5vw,44px)', fontWeight:400, color:'var(--TX)', lineHeight:1.12, marginBottom:32 }}>
-              Root-cause care for complex health and lasting vitality
-            </h2>
-            <div style={{ display:'flex', gap:12 }}>
-              <motion.button whileTap={{ scale:.92 }} onClick={() => setIdx(p => (p-1+cards.length)%cards.length)}
-                style={{ width:44, height:44, borderRadius:'50%', border:'1px solid var(--BD)',
-                  background:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--TX)' }}>
-                <ChevronLeft size={18}/>
-              </motion.button>
-              <motion.button whileTap={{ scale:.92 }} onClick={() => setIdx(p => (p+1)%cards.length)}
-                style={{ width:44, height:44, borderRadius:'50%', border:'1px solid var(--G)',
-                  background:'var(--G)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}>
-                <ChevronRight size={18}/>
-              </motion.button>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', alignItems: 'center' }}>
+        {['UNICEF', 'WHO', 'UNFPA', 'USAID', 'Kenya MOH', 'Kenya Red Cross', 'AMREF', 'MSF'].map((p, i) => (
+          <R key={p} d={i * .04}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--TM)', letterSpacing: '.12em', textTransform: 'uppercase', padding: '9px 20px', border: '1px solid var(--BD2)', borderRadius: 8, background: '#fff', transition: 'border-color .2s, color .2s, transform .2s', cursor: 'default' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--G)'; e.currentTarget.style.color = 'var(--G)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--BD2)'; e.currentTarget.style.color = 'var(--TM)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+              {p}
             </div>
           </R>
+        ))}
+      </div>
+    </W>
+  </section>
+);
 
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }}>
-            <AnimatePresence mode="popLayout">
-              {vis.map(vi => (
-                <motion.div key={vi}
-                  initial={{ opacity:0, x:40 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-40 }}
-                  transition={{ duration:.4, ease:EASE }}
-                  style={{ border:'1px solid var(--BD)', borderRadius:10, padding:'28px 24px',
-                    background:'#fff', display:'flex', flexDirection:'column' }}>
-                  <div style={{ width:52, height:52, borderRadius:'50%', background:'var(--MT)', marginBottom:20,
-                    backgroundImage:`url(/images/backpage${vi%2===0?'2':'3'}.jpeg)`,
-                    backgroundSize:'cover', backgroundPosition:'center' }}/>
-                  <h3 className="sr" style={{ fontSize:22, fontWeight:400, color:'var(--TX)', marginBottom:12, lineHeight:1.2 }}>
-                    {cards[vi].title}
-                  </h3>
-                  <p style={{ fontSize:14, color:'var(--TM)', marginBottom:10, lineHeight:1.65, fontWeight:300 }}>
-                    {cards[vi].desc}
-                  </p>
-                  <p style={{ fontSize:12, color:'var(--TL)', lineHeight:1.6, fontWeight:300, flexGrow:1 }}>
-                    {cards[vi].syms}
-                  </p>
-                  <a href={cards[vi].href} style={{ marginTop:20, fontSize:14, color:'var(--G)',
-                    display:'flex', alignItems:'center', gap:6, fontWeight:500 }}>
-                    {cards[vi].title.split(' ')[0]} care <ArrowRight size={13}/>
-                  </a>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        </div>
-      </>}/>
-    </section>
-  );
-};
-
-/* ═══════════════════════════════════════════
-   §13  COMMUNITY STORIES CAROUSEL
-   (mirrors screenshot 11)
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   §11  CLIENT VOICES
+═══════════════════════════════════════════════════════════ */
 const Stories = () => {
   const [page, setPage] = useState(0);
   const all = [
-    { name:'Amara O.',  tag:'"Finally, real answers."',     quote:'Altura gave me answers after years of being dismissed. My fatigue disappeared within three months. I feel like myself again.' },
-    { name:'James K.',  tag:'"Life-changing expertise."',   quote:'The level of attention is unlike anything I have experienced. They don\'t just treat symptoms — they trace everything to its origin.' },
-    { name:'Selin T.',  tag:'"The lab results changed everything."', quote:'I came in sceptical. The comprehensive panel was eye-opening. The care plan that followed transformed how I understand my own health.' },
-    { name:'Grace M.',  tag:'"Policy meets practice."',     quote:'Working with Altura helped our county health team develop a PHC strategy that is actually grounded in what patients need.' },
-    { name:'David N.',  tag:'"Truly holistic care."',       quote:'After years of being told my symptoms were stress, Altura identified the root cause within the first two consultations. Remarkable.' },
-    { name:'Faith A.',  tag:'"Preventive care that works."', quote:'The longevity labs revealed things my GP had never tested for. I now have a proactive health plan instead of just waiting for problems.' },
+    { name: 'Amara O.', role: 'County Health Director', quote: "Altura gave our county a workable, evidence-based framework. Implementation was smoother than any engagement we'd had before." },
+    { name: 'James K.', role: 'Programme Officer, WHO', quote: "The level of attention is unlike anything I have experienced. They don't just consult — they embed and build our capacity to continue." },
+    { name: 'Selin T.', role: 'National Policy Lead', quote: "The policy document Altura developed is now being used as a template in three neighbouring counties. That's work that outlasts the engagement." },
+    { name: 'Grace M.', role: 'UNFPA Programme Manager', quote: "Working with Altura helped our team develop a PHC strategy that is actually grounded in what communities need — not what looks good in a report." },
+    { name: 'David N.', role: 'NGO Director', quote: "After years of siloed approaches, Altura helped us see the system. The change in how our team thinks about health challenges has been remarkable." },
+    { name: 'Faith A.', role: 'County Health Executive', quote: "The capacity building programme has stayed with our staff. A year later, they're still applying what they learned. That's impact that compounds." },
   ];
   const total = Math.ceil(all.length / 3);
-  const vis = all.slice(page*3, page*3+3);
+  const vis = all.slice(page * 3, page * 3 + 3);
 
   return (
-    <section style={{ background:'var(--CR)', padding:'96px 0' }}>
-      <W ch={<>
-        <R style={{ textAlign:'center', marginBottom:56 }}>
-          <h2 className="sr" style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:400, color:'var(--TX)' }}>
-            Hear directly from our community
-          </h2>
+    <section style={{ background: 'var(--CR2)', padding: 'clamp(72px,10vw,120px) 0' }}>
+      <W>
+        <R>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 52, flexWrap: 'wrap', gap: 20 }}>
+            <div>
+              <p className="caps" style={{ marginBottom: 14 }}>Client Voices</p>
+              <h2 className="serif" style={{ fontSize: 'clamp(28px,4vw,48px)', fontWeight: 400, color: 'var(--TX)', lineHeight: 1.1 }}>What our partners say</h2>
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <motion.button whileTap={{ scale: .92 }} onClick={() => setPage(p => Math.max(0, p - 1))}
+                style={{ width: 44, height: 44, borderRadius: '50%', border: '1.5px solid var(--BD)', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--TX)', transition: 'border-color .2s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--G)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--BD)'}>
+                <ChevronLeft size={16} strokeWidth={1.8} />
+              </motion.button>
+              <motion.button whileTap={{ scale: .92 }} onClick={() => setPage(p => Math.min(total - 1, p + 1))}
+                style={{ width: 44, height: 44, borderRadius: '50%', border: 'none', background: 'var(--G)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', transition: 'background .2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--G2)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'var(--G)'}>
+                <ChevronRight size={16} strokeWidth={1.8} />
+              </motion.button>
+            </div>
+          </div>
         </R>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:24, marginBottom:40 }}>
+
+        <div className="st-cols" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
           <AnimatePresence mode="wait">
-            {vis.map((s,i) => (
-              <motion.div key={s.name+page}
-                initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-10 }}
-                transition={{ duration:.4, ease:EASE, delay:i*.08 }}>
-                <div style={{ border:'1px solid var(--BD)', borderRadius:10, overflow:'hidden', background:'#fff' }}>
-                  <div style={{ height:180, background:'var(--MT)', display:'flex', alignItems:'center', justifyContent:'center',
-                    fontSize:48, color:'var(--TL)' }}>◎</div>
-                  <div style={{ padding:'24px 24px 28px', borderTop:'1px solid var(--BD)' }}>
-                    <p style={{ fontSize:15, fontWeight:600, color:'var(--TX)', marginBottom:6, textAlign:'center' }}>{s.name}</p>
-                    <p style={{ fontSize:13, color:'var(--G)', fontStyle:'italic', marginBottom:14, textAlign:'center' }}>{s.tag}</p>
-                    <p style={{ fontSize:14, color:'var(--TM)', lineHeight:1.7, fontWeight:300, textAlign:'center' }}>"{s.quote}"</p>
+            {vis.map((s, i) => (
+              <motion.div key={s.name + page} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: .38, ease: EASE, delay: i * .06 }}>
+                <div className="lift" style={{ background: '#fff', borderRadius: 18, border: '1px solid var(--BD2)', padding: 'clamp(22px,3vw,30px)', display: 'flex', flexDirection: 'column', gap: 22, boxShadow: '0 2px 12px rgba(26,46,36,.04)', height: '100%' }}>
+                  <div style={{ display: 'flex', gap: 3 }}>{[...Array(5)].map((_, j) => <span key={j} style={{ color: 'var(--TC2)', fontSize: 13 }}>★</span>)}</div>
+                  <p style={{ fontSize: 14.5, color: 'var(--TM)', fontWeight: 300, lineHeight: 1.82, fontStyle: 'italic', flex: 1 }}>"{s.quote}"</p>
+                  <div style={{ borderTop: '1px solid var(--BD2)', paddingTop: 16 }}>
+                    <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--TX)' }}>{s.name}</p>
+                    <p style={{ fontSize: 11.5, color: 'var(--TL)', marginTop: 3, fontWeight: 400 }}>{s.role}</p>
                   </div>
                 </div>
               </motion.div>
@@ -682,177 +632,123 @@ const Stories = () => {
           </AnimatePresence>
         </div>
 
-        {/* dots + arrows */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <motion.button whileTap={{ scale:.92 }} onClick={() => setPage(p => Math.max(0,p-1))}
-            style={{ width:44, height:44, borderRadius:'50%', border:'1px solid var(--BD)',
-              background: page===0 ? '#fff' : 'var(--G)',
-              color: page===0 ? 'var(--TL)' : '#fff',
-              cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <ChevronLeft size={18}/>
-          </motion.button>
-          <div style={{ display:'flex', gap:10 }}>
-            {Array.from({ length:total }).map((_,i) => (
-              <motion.button key={i} onClick={() => setPage(i)}
-                style={{ width: i===page ? 28 : 10, height:10, borderRadius:99, border:'none', cursor:'pointer',
-                  background: i===page ? 'var(--G)' : 'var(--BD)', transition:'all .3s' }}/>
-            ))}
-          </div>
-          <motion.button whileTap={{ scale:.92 }} onClick={() => setPage(p => Math.min(total-1,p+1))}
-            style={{ width:44, height:44, borderRadius:'50%', border:'none',
-              background:'var(--G)', color:'#fff',
-              cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <ChevronRight size={18}/>
-          </motion.button>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 36 }}>
+          {Array.from({ length: total }).map((_, i) => (
+            <motion.button key={i} onClick={() => setPage(i)}
+              style={{ width: i === page ? 28 : 8, height: 8, borderRadius: 99, border: 'none', cursor: 'pointer', background: i === page ? 'var(--G)' : 'var(--BD)', transition: 'all .35s cubic-bezier(.4,0,.2,1)' }} />
+          ))}
         </div>
-      </>}/>
+      </W>
     </section>
   );
 };
 
-/* ═══════════════════════════════════════════
-   §14  SECOND TERRACOTTA QUOTE
-   (mirrors screenshot 2)
-═══════════════════════════════════════════ */
-const TerraQuote = () => (
-  <section style={{ background:'linear-gradient(135deg,#7a3a24 0%,#b06040 40%,#8a5030 100%)', padding:'112px 40px', textAlign:'center' }}>
-    <R>
-      <h2 className="sr" style={{ fontSize:'clamp(24px,3vw,38px)', fontWeight:400, color:'#fff', marginBottom:48 }}>
-        Life-changing care starts now
-      </h2>
-      <div style={{ width:1, height:80, background:'rgba(255,255,255,.3)', margin:'0 auto 48px' }}/>
-      <div style={{ fontSize:20, letterSpacing:'.28em', color:'rgba(255,255,255,.8)', marginBottom:36 }}>★★★★★</div>
-      <blockquote style={{ fontSize:'clamp(16px,2vw,22px)', fontWeight:300, fontStyle:'italic',
-        color:'rgba(255,255,255,.92)', lineHeight:1.65, maxWidth:720, margin:'0 auto 36px' }}>
-        "Altura has been life-changing for me. The team caught patterns in my labs and helped me avoid
-        serious outcomes. My health has vastly improved since I became an Altura patient. Highly recommend."
+/* ═══════════════════════════════════════════════════════════
+   §12  CLOSING CTA — terracotta
+═══════════════════════════════════════════════════════════ */
+const ClosingCTA = () => (
+  <section style={{ background: 'linear-gradient(135deg,#7a3a24 0%,#b06040 45%,#8a5030 100%)', padding: 'clamp(80px,12vw,128px) clamp(20px,5vw,56px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center,rgba(255,255,255,.06) 0%,transparent 65%)', pointerEvents: 'none' }} />
+    <R style={{ position: 'relative', maxWidth: 720, margin: '0 auto' }}>
+      <p className="caps" style={{ color: 'rgba(255,255,255,.42)', marginBottom: 20 }}>Begin Today</p>
+      <h2 className="serif" style={{ fontSize: 'clamp(28px,5vw,58px)', fontWeight: 400, color: '#fff', marginBottom: 56, lineHeight: 1.15, letterSpacing: '-0.02em' }}>Life-changing care starts now</h2>
+      <div style={{ width: 1, height: 60, background: 'rgba(255,255,255,.2)', margin: '0 auto 52px' }} />
+      <div style={{ display: 'flex', gap: 4, justifyContent: 'center', marginBottom: 26 }}>
+        {[...Array(5)].map((_, i) => <span key={i} style={{ color: 'rgba(255,255,255,.62)', fontSize: 14 }}>★</span>)}
+      </div>
+      <blockquote className="serif" style={{ fontSize: 'clamp(15px,2vw,22px)', fontWeight: 300, fontStyle: 'italic', color: 'rgba(255,255,255,.88)', lineHeight: 1.78, marginBottom: 36 }}>
+        "Altura has been life-changing for me. The team caught patterns in my labs and helped me avoid serious outcomes. My health has vastly improved since I became an Altura patient."
       </blockquote>
-      <p style={{ fontSize:13, fontWeight:600, letterSpacing:'.12em', textTransform:'uppercase', color:'rgba(255,255,255,.7)', marginBottom:4 }}>
-        GRACE M.
-      </p>
-      <p style={{ fontSize:12, letterSpacing:'.1em', textTransform:'uppercase', color:'rgba(255,255,255,.5)', marginBottom:44 }}>
-        ALTURA HEALTH MEMBER
-      </p>
-      <a href="/contact" style={{ fontSize:15, color:'rgba(255,255,255,.8)',
-        display:'inline-flex', alignItems:'center', gap:6, textDecoration:'underline', textUnderlineOffset:3 }}>
-        Hear more member stories <ArrowRight size={14}/>
-      </a>
+      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,.6)', marginBottom: 4 }}>Grace M.</p>
+      <p style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.35)', marginBottom: 52 }}>Altura Health Member</p>
+      <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <Btn v="white" href="/contact">Partner with us <ArrowRight size={14} strokeWidth={2} /></Btn>
+        <Btn v="ow" href="/services">Our services</Btn>
+      </div>
     </R>
   </section>
 );
 
-/* ═══════════════════════════════════════════
-   §15  FOOTER
-   (mirrors screenshot 1)
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   §13  FOOTER
+═══════════════════════════════════════════════════════════ */
 const Footer = () => {
   const [email, setEmail] = useState('');
   const cols = [
-    { h:'Conditions', links:['Gut Health','Hormone Health','Autoimmune','Menopause','Fertility','Heart Health','Metabolic Health','Mental Health'] },
-    { h:'Care',       links:['What We Offer','Complete Care','Longevity Labs','Lab Review','How It Works'] },
-    { h:'Our Approach', links:['Our Methodology','Our Clinicians','Nutrition Coaching','Member Stories','About Altura'] },
-    { h:'Resources',  links:['FAQs','Blog','Research','Press','Careers','Contact Us'] },
+    { h: 'Services', links: ['Health Systems', 'Policy & Advocacy', 'PHC & Family Medicine', 'Capacity Building', 'Health Technology', 'Disease Prevention'] },
+    { h: 'Company', links: ['About Altura', 'Our Methodology', 'Leadership Team', 'Partner Stories', 'Careers', 'Contact Us'] },
+    { h: 'Resources', links: ['Case Studies', 'Research Papers', 'Blog & Insights', 'Press Room', 'FAQs'] },
+    { h: 'Work With Us', links: ['Governments', 'NGO Partners', 'County Governments', 'Private Sector', 'Academic Partners'] },
   ];
   return (
-    <footer style={{ background:'var(--G)', padding:'80px 0 40px' }}>
-      <W ch={<>
-        <div style={{ display:'grid', gridTemplateColumns:'280px repeat(4,1fr)', gap:48, marginBottom:64 }}>
-          {/* brand col */}
+    <footer style={{ background: 'var(--G4)', padding: 'clamp(60px,8vw,96px) 0 40px' }}>
+      <W>
+        <div className="footer-cols" style={{ display: 'grid', gridTemplateColumns: '280px repeat(4,1fr)', gap: 'clamp(28px,4vw,44px)', marginBottom: 64 }}>
           <div>
-            <div className="sr" style={{ fontSize:32, fontWeight:400, color:'#fff', marginBottom:20 }}>Altura</div>
-            <p style={{ fontSize:13, color:'rgba(255,255,255,.45)', lineHeight:1.75, fontWeight:300, marginBottom:28, maxWidth:220 }}>
-              Root-cause health consultancy bridging clinical medicine and public health policy.
-            </p>
-            <p style={{ fontSize:12, fontWeight:600, letterSpacing:'.08em', color:'#8eb8a0', marginBottom:12 }}>
-              Sign up for our newsletter
-            </p>
-            <div style={{ display:'flex', gap:0, borderRadius:99, overflow:'hidden', border:'1px solid rgba(255,255,255,.15)' }}>
-              <input value={email} onChange={e=>setEmail(e.target.value)}
-                placeholder="Enter your email"
-                style={{ flex:1, padding:'10px 16px', background:'rgba(255,255,255,.08)',
-                  border:'none', color:'#fff', fontSize:13, outline:'none' }}/>
-              <button onClick={()=>setEmail('')}
-                style={{ padding:'10px 18px', background:'rgba(255,255,255,.15)', color:'#fff',
-                  border:'none', cursor:'pointer', fontSize:13, fontWeight:500, whiteSpace:'nowrap' }}>
-                Sign Up
-              </button>
-            </div>
-            <div style={{ display:'flex', gap:16, marginTop:24 }}>
-              {['f','in','▶','@'].map(s => (
-                <a key={s} href="#" style={{ width:36, height:36, borderRadius:'50%',
-                  border:'1px solid rgba(255,255,255,.15)', display:'flex', alignItems:'center', justifyContent:'center',
-                  color:'rgba(255,255,255,.5)', fontSize:13 }}>{s}</a>
-              ))}
+            <div className="serif" style={{ fontSize: 28, fontWeight: 400, color: '#fff', marginBottom: 4, letterSpacing: '-0.01em' }}>Altura</div>
+            <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: '#6eb89a', marginBottom: 20 }}>Health Strategies Limited</p>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,.3)', lineHeight: 1.82, fontWeight: 300, marginBottom: 28, maxWidth: 210 }}>Root-cause health consultancy bridging clinical medicine, public health, and policy.</p>
+            <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#6eb89a', marginBottom: 14 }}>Newsletter</p>
+            <div style={{ display: 'flex', borderRadius: 99, overflow: 'hidden', border: '1px solid rgba(255,255,255,.1)', background: 'rgba(255,255,255,.04)' }}>
+              <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Your email"
+                style={{ flex: 1, padding: '9px 14px', background: 'transparent', border: 'none', color: '#fff', fontSize: 12, outline: 'none' }} />
+              <button onClick={() => setEmail('')}
+                style={{ padding: '9px 16px', background: 'var(--G2)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 600, letterSpacing: '.06em', whiteSpace: 'nowrap', transition: 'background .2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = '#3a6254'}
+                onMouseLeave={e => e.currentTarget.style.background = 'var(--G2)'}>Subscribe</button>
             </div>
           </div>
-
-          {/* link cols */}
           {cols.map(c => (
             <div key={c.h}>
-              <p style={{ fontSize:12, fontWeight:600, letterSpacing:'.1em', textTransform:'uppercase', color:'#8eb8a0', marginBottom:20 }}>
-                {c.h}
-              </p>
-              <ul style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:12 }}>
+              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#6eb89a', marginBottom: 18 }}>{c.h}</p>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {c.links.map(l => (
                   <li key={l}>
-                    <a href="#" onMouseEnter={e=>e.target.style.color='#fff'} onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.45)'}
-                      style={{ fontSize:14, color:'rgba(255,255,255,.45)', fontWeight:300, transition:'color .15s' }}>
-                      {l}
-                    </a>
+                    <a href="#" style={{ fontSize: 13, color: 'rgba(255,255,255,.3)', fontWeight: 300, transition: 'color .2s' }}
+                      onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,.75)'}
+                      onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,.3)'}>{l}</a>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
         </div>
-
-        {/* bottom bar */}
-        <div style={{ borderTop:'1px solid rgba(255,255,255,.08)', paddingTop:32,
-          display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:16 }}>
-          <span style={{ fontSize:13, color:'rgba(255,255,255,.25)' }}>
-            © 2026 Altura Health. P.O Box 70036 – 00400, Nairobi, Kenya. All rights reserved.
-          </span>
-          <div style={{ display:'flex', gap:24 }}>
-            {['Privacy Policy','Terms of Use','Accessibility'].map(l => (
-              <a key={l} href="#" style={{ fontSize:13, color:'rgba(255,255,255,.25)' }}>{l}</a>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,.06)', paddingTop: 26, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14, alignItems: 'center' }}>
+          <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.18)' }}>© 2026 Altura Health Strategies Limited · P.O Box 70036 – 00400, Nairobi, Kenya</span>
+          <div style={{ display: 'flex', gap: 22 }}>
+            {['Privacy Policy', 'Terms of Use', 'Accessibility'].map(l => (
+              <a key={l} href="#" style={{ fontSize: 11.5, color: 'rgba(255,255,255,.18)', transition: 'color .2s' }}
+                onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,.5)'}
+                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,.18)'}>{l}</a>
             ))}
           </div>
         </div>
-      </>}/>
+      </W>
     </footer>
   );
 };
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    PAGE EXPORT
-═══════════════════════════════════════════ */
+═══════════════════════════════════════════════════════════ */
 export default function Index() {
   return (
     <>
-      <G/>
-      {/* Sticky get-care pill */}
-      <a href="/contact" className="sc">Get care <ArrowRight size={16}/></a>
-
+      <GlobalStyles />
+      <a href="/contact" className="sc">Partner with us <ArrowRight size={14} strokeWidth={2} /></a>
       <main>
-        <Hero/>
-        <ThreeWays/>
-        <NeedHelp/>
-        <Understanding/>
-        <BigQuote
-          quote="Altura gave me my health back after years of worsening symptoms. I had been to several different specialists over the years and Altura was the first to successfully identify the underlying cause of my seemingly mysterious symptoms."
-          name="Grace M."
-          role="ALTURA HEALTH MEMBER"
-        />
-        <WhyStats/>
-        <HowWeDeliver/>
-        <MemberOutcomes/>
-        <CompareTable/>
-        <Statement/>
-        <ScheduleAndLogos/>
-        <Conditions/>
-        <Stories/>
-        <TerraQuote/>
-        <Footer/>
+        <Hero />
+        <TrustBar />
+        <Ticker />
+        <CoreValues />
+        <WhatWeDo />
+        <NeedHelp />
+        <SuccessStories />
+        <OnTheGround />
+        <Statement />
+        <Partners />
+        <Stories />
+        <ClosingCTA />
       </main>
     </>
   );
